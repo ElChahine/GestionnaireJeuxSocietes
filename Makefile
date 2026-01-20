@@ -1,4 +1,4 @@
-.PHONY: compile run test clean
+make .PHONY: compile run test clean
 
 compile:
 	./mvnw compile
