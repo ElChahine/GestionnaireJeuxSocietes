@@ -1,5 +1,7 @@
 package fr.fges;
 
+import fr.fges.ui.InputHandler;
+import fr.fges.ui.MenuPrinter;
 import java.util.Scanner;
 
 public class Menu {
@@ -14,35 +16,30 @@ public class Menu {
     }
 
     public static void displayMainMenu() {
-        String menuText = """
-                === Board Game Collection ===
-                1. Add Board Game
-                2. Remove Board Game
-                3. List All Board Games
-                4. Exit
-                Please select an option (1-4):
-                """;
-
-        System.out.println(menuText);
+        MenuPrinter printer = new MenuPrinter();
+        printer.printMainMenu();
     }
 
     public static void addGame() {
-        String title = getUserInput("Title");
-        String minPlayersStr = getUserInput("Minimum Players");
-        String maxPlayersStr = getUserInput("Maximum Players");
-        String category = getUserInput("Category (e.g., fantasy, cooperative, family, strategy)");
+        InputHandler input = new InputHandler();
+        MenuPrinter printer = new MenuPrinter();
 
-        int minPlayers = Integer.parseInt(minPlayersStr);
-        int maxPlayers = Integer.parseInt(maxPlayersStr);
+        String title = input.askString("Title");
+        int minPlayers = input.askInt("Minimum Players");
+        int maxPlayers = input.askInt("Maximum Players");
+        String category = input.askString("Category (e.g., fantasy, cooperative, family, strategy)");
 
         BoardGame game = new BoardGame(title, minPlayers, maxPlayers, category);
 
         GameCollection.addGame(game);
-        System.out.println("Board game added successfully.");
+        printer.printAddSuccess();
     }
 
     public static void removeGame() {
-        String title = getUserInput("Title of game to remove");
+        InputHandler input = new InputHandler();
+        MenuPrinter printer = new MenuPrinter();
+
+        String title = input.askString("Title of game to remove");
 
         // get games from the collection, find the one that matches the title given by the user and remove
         var games = GameCollection.getGames();
@@ -50,34 +47,39 @@ public class Menu {
         for (BoardGame game : games) {
             if (game.title().equals(title)) {
                 GameCollection.removeGame(game);
-                System.out.println("Board game removed successfully.");
+                printer.printRemoveSuccess();
                 return;
             }
         }
-        System.out.println("No board game found with that title.");
+        printer.printNoGameFound();
     }
 
     public static void listAllGames() {
-        GameCollection.viewAllGames();
+        MenuPrinter printer = new MenuPrinter();
+        printer.printGames(GameCollection.getGamesSortedByTitle());
     }
 
     public static void exit() {
-        System.out.println("Exiting the application. Goodbye!");
+        MenuPrinter printer = new MenuPrinter();
+        printer.printExitMessage();
         System.exit(0);
     }
 
     public static void handleMenu() {
         displayMainMenu();
 
-        Scanner scanner = new Scanner(System.in);
-        String choice = scanner.nextLine();
+        InputHandler input = new InputHandler();
+        String choice = input.askString("Select option");
 
         switch (choice) {
             case "1" -> addGame();
             case "2" -> removeGame();
             case "3" -> listAllGames();
             case "4" -> exit();
-            default -> System.out.println("Invalid choice. Please select a valid option.");
+            default -> {
+                MenuPrinter printer = new MenuPrinter();
+                printer.printInvalidChoice();
+            }
         }
     }
 }

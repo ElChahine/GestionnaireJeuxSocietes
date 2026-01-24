@@ -25,6 +25,16 @@ public class GameCollection {
         return games;
     }
 
+    /**
+     * Returns a new list of games sorted by title.
+     * Keeps sorting logic in the domain layer.
+     */
+    public static List<BoardGame> getGamesSortedByTitle() {
+        return games.stream()
+                .sorted(Comparator.comparing(BoardGame::title))
+                .toList();
+    }
+
     public static void addGame(BoardGame game) {
         games.add(game);
         saveToFile();
