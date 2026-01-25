@@ -2,33 +2,31 @@ package fr.fges.logic;
 
 import fr.fges.BoardGame;
 import fr.fges.data.IGameRepository;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * Contient toute la logique métier (règles de gestion).
+ * Ne sait pas comment on stocke (JSON/CSV) ni comment on affiche (Console).
+ */
 public class GameService {
     private final IGameRepository repository;
     private final List<BoardGame> games;
 
     public GameService(IGameRepository repository) {
         this.repository = repository;
-        // Au démarrage, on charge les données
+        // Charge les données en mémoire au démarrage
         this.games = repository.load();
-        // Si le fichier n'existait pas, on initialise une liste vide pour éviter le crash
-        if (this.games == null) {
-            // Note: on utilise ArrayList modifiable, pas List.of()
-            // games = new ArrayList<>(); // A décommenter si besoin selon l'implémentation du repo
-        }
     }
 
     public void addGame(BoardGame game) {
         games.add(game);
+        // Sauvegarde immédiate après modification
         repository.save(games);
     }
 
     public boolean removeGame(String title) {
-        // Logique extraite et nettoyée de l'ancien Menu.java
-        // On cherche le jeu par son titre
+        // Recherche le jeu par son titre exact
         BoardGame toRemove = null;
         for (BoardGame game : games) {
             if (game.title().equals(title)) {
@@ -37,6 +35,7 @@ public class GameService {
             }
         }
 
+        // Si trouvé, on supprime et on sauvegarde
         if (toRemove != null) {
             games.remove(toRemove);
             repository.save(games);
@@ -46,7 +45,7 @@ public class GameService {
     }
 
     public List<BoardGame> getSortedGames() {
-        // Logique extraite de GameCollection.java
+        // Retourne une liste triée alphabétiquement
         return games.stream()
                 .sorted(Comparator.comparing(BoardGame::title))
                 .toList();

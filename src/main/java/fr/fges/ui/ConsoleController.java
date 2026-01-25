@@ -3,6 +3,10 @@ package fr.fges.ui;
 import fr.fges.BoardGame;
 import fr.fges.logic.GameService;
 
+/**
+ * Chef d'orchestre de l'interface.
+ * Fait le lien entre la saisie (Input), l'affichage (Printer) et la logique (Service).
+ */
 public class ConsoleController {
     private final GameService gameService;
     private final InputHandler inputHandler;
@@ -15,48 +19,55 @@ public class ConsoleController {
     }
 
     public void start() {
-        // La boucle infinie déplacée ici
+        // Boucle principale de l'application
         while (true) {
-            menuPrinter.displayMainMenu();
-            String choice = inputHandler.getUserInput("Please select an option (1-4)");
+            menuPrinter.printMainMenu();
+
+            // Récupère le choix de l'utilisateur
+            String choice = inputHandler.askString("Please select an option (1-4)");
 
             switch (choice) {
                 case "1" -> handleAddGame();
                 case "2" -> handleRemoveGame();
                 case "3" -> handleListGames();
                 case "4" -> {
-                    System.out.println("Goodbye!"); // Tu pourras mettre ça dans printer plus tard
-                    return; // Sort de la boucle et donc du programme
+                    menuPrinter.printExitMessage();
+                    return; // Arrête la boucle et le programme
                 }
-                default -> menuPrinter.showError("Invalid choice.");
+                default -> menuPrinter.printInvalidChoice();
             }
         }
     }
 
     private void handleAddGame() {
-        // On utilise l'inputHandler pour poser les questions
-        String title = inputHandler.getUserInput("Title");
-        // Pour faire simple ici, on parse. Idéalement inputHandler aurait askInt()
-        int minPlayers = Integer.parseInt(inputHandler.getUserInput("Min Players"));
-        int maxPlayers = Integer.parseInt(inputHandler.getUserInput("Max Players"));
-        String category = inputHandler.getUserInput("Category");
+        // Demande les informations à l'utilisateur via InputHandler
+        String title = inputHandler.askString("Title");
+        int minPlayers = inputHandler.askInt("Min Players");
+        int maxPlayers = inputHandler.askInt("Max Players");
+        String category = inputHandler.askString("Category");
 
+        // Crée l'objet et l'envoie au service
         BoardGame newGame = new BoardGame(title, minPlayers, maxPlayers, category);
         gameService.addGame(newGame);
-        menuPrinter.showSuccess();
+
+        menuPrinter.printAddSuccess();
     }
 
     private void handleRemoveGame() {
-        String title = inputHandler.getUserInput("Title to remove");
+        String title = inputHandler.askString("Title to remove");
+
+        // Tente la suppression via le service
         boolean removed = gameService.removeGame(title);
+
         if (removed) {
-            menuPrinter.showSuccess();
+            menuPrinter.printRemoveSuccess();
         } else {
-            menuPrinter.showError("Game not found: " + title);
+            menuPrinter.printNoGameFound();
         }
     }
 
     private void handleListGames() {
+        // Récupère la liste triée depuis le service et l'affiche
         var games = gameService.getSortedGames();
         menuPrinter.printGames(games);
     }

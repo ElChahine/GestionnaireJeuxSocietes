@@ -1,28 +1,41 @@
 package fr.fges;
 
+import fr.fges.data.CsvFileRepository;
+import fr.fges.data.IGameRepository;
+import fr.fges.data.JsonFileRepository;
+import fr.fges.logic.GameService;
+import fr.fges.ui.ConsoleController;
+import fr.fges.ui.InputHandler;
+import fr.fges.ui.MenuPrinter;
+
 public class Main {
     public static void main(String[] args) {
         if (args.length < 1) {
-            System.out.println("Usage: java -jar boardgamecollection.jar <storage-file>");
-            System.out.println("Storage file must be .json or .csv");
+            System.out.println("Usage: java -jar app.jar <storage-file>");
             System.exit(1);
         }
-
         String storageFile = args[0];
 
-        // Check file extension
-        if (!storageFile.endsWith(".json") && !storageFile.endsWith(".csv")) {
-            System.out.println("Error: Storage file must have .json or .csv extension");
-            System.exit(1);
+        // Choix de la stratégie de stockage selon l'extension
+        IGameRepository repository;
+        if (storageFile.endsWith(".json")) {
+            repository = new JsonFileRepository(storageFile);
+        } else if (storageFile.endsWith(".csv")) {
+            repository = new CsvFileRepository(storageFile);
+        } else {
+            System.out.println("Error: File must be .json or .csv");
+            return;
         }
 
-        GameCollection.setStorageFile(storageFile);
-        GameCollection.loadFromFile();
+        // Assemblage des composants (Injection de dépendances)
+        GameService service = new GameService(repository);
+        InputHandler input = new InputHandler();
+        MenuPrinter printer = new MenuPrinter();
+        ConsoleController controller = new ConsoleController(service, input, printer);
 
-        System.out.println("Using storage file: " + storageFile);
+        System.out.println("Starting application with file: " + storageFile);
 
-        while (true) {
-            Menu.handleMenu();
-        }
+        // Démarrage de l'interface
+        controller.start();
     }
 }
