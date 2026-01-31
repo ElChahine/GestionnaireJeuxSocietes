@@ -25,6 +25,11 @@ public class MenuPrinter {
         System.out.println("Board game added successfully.");
     }
 
+    public void printDuplicateError(String title) {
+        System.out.println("Error: A game with title \"" + title + "\" already exists");
+        System.out.println("in the collection.");
+    }
+
     public void printRemoveSuccess() {
         System.out.println("Board game removed successfully.");
     }

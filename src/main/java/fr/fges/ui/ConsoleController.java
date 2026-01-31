@@ -48,9 +48,15 @@ public class ConsoleController {
 
         // Crée l'objet et l'envoie au service
         BoardGame newGame = new BoardGame(title, minPlayers, maxPlayers, category);
-        gameService.addGame(newGame);
-
-        menuPrinter.printAddSuccess();
+        
+        // Tente l'ajout et vérifie si un doublon existe
+        boolean added = gameService.addGame(newGame);
+        
+        if (added) {
+            menuPrinter.printAddSuccess();
+        } else {
+            menuPrinter.printDuplicateError(title);
+        }
     }
 
     private void handleRemoveGame() {

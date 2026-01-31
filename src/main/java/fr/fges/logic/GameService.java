@@ -12,17 +12,30 @@ import java.util.List;
 public class GameService {
     private final IGameRepository repository;
     private final List<BoardGame> games;
+    private final DuplicateValidator duplicateValidator;
 
     public GameService(IGameRepository repository) {
         this.repository = repository;
         // Charge les données en mémoire au démarrage
         this.games = repository.load();
+        this.duplicateValidator = new DuplicateValidator();
     }
 
-    public void addGame(BoardGame game) {
+    /**
+     * Ajoute un jeu à la collection si son titre n'existe pas déjà.
+     *
+     * @param game Le jeu à ajouter
+     * @return true si le jeu a été ajouté avec succès, false si un doublon existe
+     */
+    public boolean addGame(BoardGame game) {
+        // Vérifie que le titre n'existe pas déjà
+        if (!duplicateValidator.isValidForAddition(games, game)) {
+            return false;
+        }
         games.add(game);
         // Sauvegarde immédiate après modification
         repository.save(games);
+        return true;
     }
 
     public boolean removeGame(String title) {
