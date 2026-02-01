@@ -2,11 +2,9 @@ package fr.fges.ui;
 
 import fr.fges.BoardGame;
 import fr.fges.logic.GameService;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 
-/**
- * Chef d'orchestre de l'interface.
- * Fait le lien entre la saisie (Input), l'affichage (Printer) et la logique (Service).
- */
 public class ConsoleController {
     private final GameService gameService;
     private final InputHandler inputHandler;
@@ -19,47 +17,77 @@ public class ConsoleController {
     }
 
     public void start() {
-        // Boucle principale de l'application
         while (true) {
-            menuPrinter.printMainMenu();
+            // Vérification du jour pour le menu dynamique
+            LocalDate today = LocalDate.now();
+            DayOfWeek day = today.getDayOfWeek();
+            boolean isWeekend = (day == DayOfWeek.SATURDAY || day == DayOfWeek.SUNDAY);
 
-            // Récupère le choix de l'utilisateur
-            String choice = inputHandler.askString("Please select an option (1-4)");
+            // isWeekend = true; // Décommenter pour tester
+
+            menuPrinter.printMainMenu(isWeekend);
+
+            String maxOption = isWeekend ? "6" : "5";
+            String choice = inputHandler.askString("Please select an option (1-" + maxOption + ")");
 
             switch (choice) {
                 case "1" -> handleAddGame();
                 case "2" -> handleRemoveGame();
                 case "3" -> handleListGames();
-                case "4" -> {
-                    menuPrinter.printExitMessage();
-                    return; // Arrête la boucle et le programme
+                case "4" -> handleRecommendGame();
+
+                // Le cas 5 change selon le jour
+                case "5" -> {
+                    if (isWeekend) {
+                        handleWeekendSummary();
+                    } else {
+                        menuPrinter.printExitMessage();
+                        return;
+                    }
+                }
+
+                // Le cas 6 n'existe que le week-end
+                case "6" -> {
+                    if (isWeekend) {
+                        menuPrinter.printExitMessage();
+                        return;
+                    } else {
+                        menuPrinter.printInvalidChoice();
+                    }
                 }
                 default -> menuPrinter.printInvalidChoice();
             }
         }
     }
 
+    private void handleWeekendSummary() {
+        var selection = gameService.getWeekendSelection();
+        menuPrinter.printWeekendSelection(selection);
+    }
+
+    private void handleRecommendGame() {
+        int playerCount = inputHandler.askInt("How many players?");
+        BoardGame recommended = gameService.recommendGame(playerCount);
+
+        if (recommended != null) {
+            menuPrinter.printRecommendation(recommended);
+        } else {
+            menuPrinter.printNoRecommendationFound();
+        }
+    }
+
     private void handleAddGame() {
-        // Demande les informations à l'utilisateur via InputHandler
         String title = inputHandler.askString("Title");
         int minPlayers = inputHandler.askInt("Min Players");
         int maxPlayers = inputHandler.askInt("Max Players");
         String category = inputHandler.askString("Category");
-
-        // Crée l'objet et l'envoie au service
-        BoardGame newGame = new BoardGame(title, minPlayers, maxPlayers, category);
-        gameService.addGame(newGame);
-
+        gameService.addGame(new BoardGame(title, minPlayers, maxPlayers, category));
         menuPrinter.printAddSuccess();
     }
 
     private void handleRemoveGame() {
         String title = inputHandler.askString("Title to remove");
-
-        // Tente la suppression via le service
-        boolean removed = gameService.removeGame(title);
-
-        if (removed) {
+        if (gameService.removeGame(title)) {
             menuPrinter.printRemoveSuccess();
         } else {
             menuPrinter.printNoGameFound();
@@ -67,8 +95,6 @@ public class ConsoleController {
     }
 
     private void handleListGames() {
-        // Récupère la liste triée depuis le service et l'affiche
-        var games = gameService.getSortedGames();
-        menuPrinter.printGames(games);
+        menuPrinter.printGames(gameService.getSortedGames());
     }
 }
