@@ -81,8 +81,18 @@ public class ConsoleController {
         int minPlayers = inputHandler.askInt("Min Players");
         int maxPlayers = inputHandler.askInt("Max Players");
         String category = inputHandler.askString("Category");
-        gameService.addGame(new BoardGame(title, minPlayers, maxPlayers, category));
-        menuPrinter.printAddSuccess();
+
+        // Crée l'objet et l'envoie au service
+        BoardGame newGame = new BoardGame(title, minPlayers, maxPlayers, category);
+        
+        // Tente l'ajout et vérifie si un doublon existe
+        boolean added = gameService.addGame(newGame);
+        
+        if (added) {
+            menuPrinter.printAddSuccess();
+        } else {
+            menuPrinter.printDuplicateError(title);
+        }
     }
 
     private void handleRemoveGame() {

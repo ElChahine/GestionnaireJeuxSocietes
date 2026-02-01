@@ -47,6 +47,11 @@ public class MenuPrinter {
                 " (" + game.category() + ")");
     }
 
+    public void printDuplicateError(String title) {
+        System.out.println("Error: A game with title \"" + title + "\" already exists");
+        System.out.println("in the collection.");
+    }
+
     public void printNoRecommendationFound() {
         System.out.println(" No suitable game found for this number of players.");
     }
