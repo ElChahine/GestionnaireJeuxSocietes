@@ -1,0 +1,84 @@
+
+classDiagram
+    %% --- COUCHE 1 : POINT D'ENTRÉE ---
+    class Main {
+        +main(args)
+    }
+
+    %% --- COUCHE 2 : INTERFACE UTILISATEUR (UI) ---
+    class ConsoleController {
+        -GameService service
+        -InputHandler input
+        -MenuPrinter printer
+        +start()
+        -handleRecommendGame()
+    }
+
+    class InputHandler {
+        +askString(prompt)
+        +askInt(prompt)
+    }
+
+    class MenuPrinter {
+        +printMainMenu(boolean isWeekend)
+        +printGames(List~BoardGame~ games)
+        +printAddSuccess()
+        +printRecommendation(BoardGame game)
+        +printNoRecommendationFound()
+        +printWeekendSelection(List~BoardGame~ selection)
+    }
+
+    %% --- COUCHE 3 : LOGIQUE MÉTIER (LOGIC) ---
+    class GameService {
+        -IGameRepository repository
+        -List~BoardGame~ games
+        +addGame(game)
+        +removeGame(title)
+        +getSortedGames()
+        +recommendGame(int playerCount)
+        +getWeekendSelection()
+    }
+
+    %% --- COUCHE 4 : DONNÉES (DATA) ---
+    class IGameRepository {
+        <<Interface>>
+        +load()
+        +save()
+    }
+
+    class JsonFileRepository {
+        +load()
+        +save()
+    }
+
+    class CsvFileRepository {
+        +load()
+        +save()
+    }
+
+    %% --- LE MODÈLE (Circule partout) ---
+    class BoardGame {
+        <<Record>>
+        String title
+        int minPlayers
+        int maxPlayers
+        String category
+    }
+
+    %% RELATIONS
+    Main ..> ConsoleController : Crée et Lance
+    Main ..> GameService : Injecte
+    Main ..> JsonFileRepository : Choisit (si .json)
+    Main ..> CsvFileRepository : Choisit (si .csv)
+
+    ConsoleController --> InputHandler : Utilise pour lire
+    ConsoleController --> MenuPrinter : Utilise pour écrire
+    ConsoleController --> GameService : Appelle pour agir
+
+    GameService --> IGameRepository : Utilise pour sauvegarder
+    
+    JsonFileRepository ..|> IGameRepository : Implémente
+    CsvFileRepository ..|> IGameRepository : Implémente
+    
+    GameService ..> BoardGame : Gère une liste de
+    MenuPrinter ..> BoardGame : Affiche
