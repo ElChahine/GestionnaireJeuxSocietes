@@ -2,6 +2,8 @@ package fr.fges.ui;
 
 import fr.fges.BoardGame;
 import fr.fges.logic.GameService;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 
 /**
  * Chef d'orchestre de l'interface.
@@ -19,24 +21,50 @@ public class ConsoleController {
     }
 
     public void start() {
-        // Boucle principale de l'application
         while (true) {
-            menuPrinter.printMainMenu();
+            // Détection du Week-end (Samedi ou Dimanche)
+            LocalDate today = LocalDate.now();
+            DayOfWeek day = today.getDayOfWeek();
+            boolean isWeekend = (day == DayOfWeek.SATURDAY || day == DayOfWeek.SUNDAY);
 
-            // Récupère le choix de l'utilisateur
-            String choice = inputHandler.askString("Please select an option (1-4)");
+            menuPrinter.printMainMenu(isWeekend);
+
+            // Adapte le prompt selon le nombre d'options
+            String maxOption = isWeekend ? "5" : "4";
+            String choice = inputHandler.askString("Please select an option (1-" + maxOption + ")");
 
             switch (choice) {
                 case "1" -> handleAddGame();
                 case "2" -> handleRemoveGame();
                 case "3" -> handleListGames();
+                
+                // Gestion dynamique des options 4 et 5
                 case "4" -> {
-                    menuPrinter.printExitMessage();
-                    return; // Arrête la boucle et le programme
+                    if (isWeekend) {
+                        handleWeekendSummary();
+                    } else {
+                        menuPrinter.printExitMessage();
+                        return;
+                    }
                 }
+                case "5" -> {
+                    if (isWeekend) {
+                        menuPrinter.printExitMessage();
+                        return;
+                    } else {
+                        menuPrinter.printInvalidChoice();
+                    }
+                }
+                
                 default -> menuPrinter.printInvalidChoice();
             }
         }
+    }
+
+    // Nouvelle méthode privée pour gérer l'action du week-end
+    private void handleWeekendSummary() {
+        var selection = gameService.getWeekendSelection();
+        menuPrinter.printWeekendSelection(selection);
     }
 
     private void handleAddGame() {

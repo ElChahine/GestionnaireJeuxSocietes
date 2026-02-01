@@ -9,16 +9,40 @@ import java.util.List;
  */
 public class MenuPrinter {
 
-    public void printMainMenu() {
+    public void printMainMenu(boolean isWeekend) {
         // Affichage du menu principal sans la question de saisie
-        String menuText = """
+        String menuText;
+        if (isWeekend) {
+            menuText = """
+                === Board Game Collection ===
+                1. Add Board Game
+                2. Remove Board Game
+                3. List All Board Games
+                4. View Summary (Weekend Special!)
+                5. Exit
+                """;
+        } else {
+            menuText = """
                 === Board Game Collection ===
                 1. Add Board Game
                 2. Remove Board Game
                 3. List All Board Games
                 4. Exit
                 """;
+        }
         System.out.println(menuText);
+    }
+
+    public void printWeekendSelection(List<BoardGame> selection) {
+        System.out.println("=== Summary (3 random games) ===");
+        for (BoardGame game : selection) {
+            // Formatage conforme à la capture d'écran
+            System.out.printf("- %s (%d-%d players, %s)%n", 
+                game.title(), 
+                game.minPlayers(), 
+                game.maxPlayers(), 
+                game.category());
+        }
     }
 
     public void printAddSuccess() {

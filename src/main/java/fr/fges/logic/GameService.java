@@ -4,6 +4,8 @@ import fr.fges.BoardGame;
 import fr.fges.data.IGameRepository;
 import java.util.Comparator;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Contient toute la logique métier (règles de gestion).
@@ -51,3 +53,17 @@ public class GameService {
                 .toList();
     }
 }
+
+    public List<BoardGame> getWeekendSelection() {
+        // On travaille sur une copie pour ne pas mélanger la liste principale
+        List<BoardGame> selection = new ArrayList<>(games);
+        
+        // Mélange aléatoire
+        Collections.shuffle(selection);
+
+        // Retourne 3 jeux ou toute la liste si taille < 3
+        if (selection.size() <= 3) {
+            return selection;
+        }
+        return selection.subList(0, 3);
+    }
