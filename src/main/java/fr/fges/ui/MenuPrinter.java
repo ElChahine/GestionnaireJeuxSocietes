@@ -6,30 +6,32 @@ import java.util.List;
 public class MenuPrinter {
 
     public void printMainMenu(boolean isWeekend) {
-        String menuText;
+        System.out.println("=== Board Game Collection ===");
+        System.out.println("1. Add Board Game");
+        System.out.println("2. Remove Board Game");
+        System.out.println("3. List All Board Games");
+        System.out.println("4. Recommend a Game");
+        System.out.println("5. Undo Last Action");
+        System.out.println("6. Games for X Players"); // <--- L'option manquante
+
         if (isWeekend) {
-            menuText = """
-                === Board Game Collection ===
-                1. Add Board Game
-                2. Remove Board Game
-                3. List All Board Games
-                4. Recommend a Game
-                5. Find Games for X Players
-                6. View Summary (Weekend Special!)
-                7. Exit
-                """;
+            System.out.println("7. View Summary (Weekend Special!)");
+            System.out.println("8. Exit");
         } else {
-            menuText = """
-                === Board Game Collection ===
-                1. Add Board Game
-                2. Remove Board Game
-                3. List All Board Games
-                4. Recommend a Game
-                5. Find Games for X Players
-                6. Exit
-                """;
+            System.out.println("7. Exit");
         }
-        System.out.println(menuText);
+    }
+
+    public void printGamesForPlayers(int count, List<BoardGame> games) {
+        System.out.println("Games for " + count + " players:");
+        if (games.isEmpty()) {
+            System.out.println("  No games found.");
+        } else {
+            for (BoardGame game : games) {
+                System.out.printf("- %s (%d-%d players, %s)%n",
+                        game.title(), game.minPlayers(), game.maxPlayers(), game.category());
+            }
+        }
     }
 
     public void printWeekendSelection(List<BoardGame> selection) {
@@ -45,8 +47,7 @@ public class MenuPrinter {
     }
 
     public void printRecommendation(BoardGame game) {
-        System.out.println(" We recommend playing: " + game.title() +
-                " (" + game.category() + ")");
+        System.out.println(" We recommend playing: " + game.title() + " (" + game.category() + ")");
     }
 
     public void printDuplicateError(String title) {
@@ -58,23 +59,8 @@ public class MenuPrinter {
         System.out.println(" No suitable game found for this number of players.");
     }
 
-    public void printGamesForPlayerCount(int count, List<BoardGame> games) {
-        System.out.println("Games for " + count + " players:");
-        if (games.isEmpty()) {
-            System.out.println("No games found for this player count.");
-            return;
-        }
-
-        for (BoardGame game : games) {
-            // Formatage identique à celui demandé dans la capture
-            System.out.printf("- %s (%d-%d players, %s)%n",
-                    game.title(),
-                    game.minPlayers(),
-                    game.maxPlayers(),
-                    game.category());
-        }
-    }
-
+    public void printUndoSuccess(String actionDescription) { System.out.println("Undone: " + actionDescription); }
+    public void printNothingToUndo() { System.out.println("Nothing to undo."); }
     public void printAddSuccess() { System.out.println("Board game added successfully."); }
     public void printRemoveSuccess() { System.out.println("Board game removed successfully."); }
     public void printNoGameFound() { System.out.println("No board game found with that title."); }

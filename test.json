@@ -3,4 +3,9 @@
   "minPlayers" : 2,
   "maxPlayers" : 0,
   "category" : "-7"
+}, {
+  "title" : "1",
+  "minPlayers" : 1,
+  "maxPlayers" : 1,
+  "category" : "1"
 } ]
