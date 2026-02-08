@@ -1,4 +1,3 @@
-
 classDiagram
     %% --- COUCHE 1 : POINT D'ENTRÉE ---
     class Main {
@@ -7,11 +6,17 @@ classDiagram
 
     %% --- COUCHE 2 : INTERFACE UTILISATEUR (UI) ---
     class ConsoleController {
-        -GameService service
-        -InputHandler input
-        -MenuPrinter printer
+        -GameService gameService
+        -InputHandler inputHandler
+        -MenuPrinter menuPrinter
         +start()
+        -handleFilterByPlayers()
+        -handleWeekendSummary()
         -handleRecommendGame()
+        -handleUndoLastAction()
+        -handleAddGame()
+        -handleRemoveGame()
+        -handleListGames()
     }
 
     class InputHandler {
@@ -20,65 +25,111 @@ classDiagram
     }
 
     class MenuPrinter {
-        +printMainMenu(boolean isWeekend)
-        +printGames(List~BoardGame~ games)
-        +printAddSuccess()
-        +printRecommendation(BoardGame game)
-        +printNoRecommendationFound()
-        +printWeekendSelection(List~BoardGame~ selection)
+        +printMainMenu(isWeekend)
+        +printGamesForPlayers()
+        +printWeekendSelection()
+        +printRecommendation()
+        +printDuplicateError()
+        +printUndoSuccess()
+        +printGames()
+        %% ... autres méthodes d'affichage
     }
 
     %% --- COUCHE 3 : LOGIQUE MÉTIER (LOGIC) ---
     class GameService {
         -IGameRepository repository
         -List~BoardGame~ games
-        +addGame(game)
-        +removeGame(title)
+        -UndoManager undoManager
+        -DuplicateValidator duplicateValidator
+        +addGame(game) boolean
+        +removeGame(title) boolean
         +getSortedGames()
-        +recommendGame(int playerCount)
         +getWeekendSelection()
+        +recommendGame(playerCount)
+        +getGamesForPlayerCount(count)
+        +undoLastAction() String
+        +hasActionsToUndo() boolean
+    }
+
+    class DuplicateValidator {
+        +isDuplicate(games, title) boolean
+        +isValidForAddition(games, newGame) boolean
+    }
+
+    class UndoManager {
+        -Stack~GameAction~ history
+        +recordAction(action)
+        +undoLastAction() GameAction
+        +hasActionsToUndo() boolean
+    }
+
+    class GameAction {
+        -ActionType type
+        -BoardGame game
+        +getType()
+        +getGame()
+        +getDescription()
+    }
+
+    class ActionType {
+        <<Enumeration>>
+        ADD
+        REMOVE
     }
 
     %% --- COUCHE 4 : DONNÉES (DATA) ---
     class IGameRepository {
         <<Interface>>
-        +load()
-        +save()
+        +load() List~BoardGame~
+        +save(games)
     }
 
     class JsonFileRepository {
+        -File file
+        -ObjectMapper mapper
         +load()
-        +save()
+        +save(games)
     }
 
     class CsvFileRepository {
+        -File file
         +load()
-        +save()
+        +save(games)
     }
 
     %% --- LE MODÈLE (Circule partout) ---
     class BoardGame {
         <<Record>>
-        String title
-        int minPlayers
-        int maxPlayers
-        String category
+        +String title
+        +int minPlayers
+        +int maxPlayers
+        +String category
     }
 
-    %% RELATIONS
-    Main ..> ConsoleController : Crée et Lance
-    Main ..> GameService : Injecte
-    Main ..> JsonFileRepository : Choisit (si .json)
-    Main ..> CsvFileRepository : Choisit (si .csv)
-
-    ConsoleController --> InputHandler : Utilise pour lire
-    ConsoleController --> MenuPrinter : Utilise pour écrire
-    ConsoleController --> GameService : Appelle pour agir
-
-    GameService --> IGameRepository : Utilise pour sauvegarder
+    %% --- RELATIONS ET DÉPENDANCES ---
     
+    %% Injection depuis le Main
+    Main ..> ConsoleController : Crée
+    Main ..> GameService : Crée
+    Main ..> JsonFileRepository : Instancie (si .json)
+    Main ..> CsvFileRepository : Instancie (si .csv)
+
+    %% Relations UI
+    ConsoleController --> GameService : Appelle
+    ConsoleController --> InputHandler : Lit
+    ConsoleController --> MenuPrinter : Affiche
+
+    %% Relations Logic
+    GameService --> IGameRepository : Sauvegarde/Charge
+    GameService --> UndoManager : Gère l'historique
+    GameService --> DuplicateValidator : Vérifie
+    GameService o-- BoardGame : Contient une liste de
+    
+    %% Relations Undo
+    UndoManager o-- GameAction : Stocke dans une pile
+    GameAction --> ActionType : Définit le type
+    GameAction --> BoardGame : Cible
+
+    %% Relations Data
     JsonFileRepository ..|> IGameRepository : Implémente
     CsvFileRepository ..|> IGameRepository : Implémente
-    
-    GameService ..> BoardGame : Gère une liste de
-    MenuPrinter ..> BoardGame : Affiche
