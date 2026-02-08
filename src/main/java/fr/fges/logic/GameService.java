@@ -13,11 +13,13 @@ public class GameService {
     private final List<BoardGame> games;
     private final Random random = new Random();
     private final DuplicateValidator duplicateValidator;
+    private final UndoManager undoManager;
 
     public GameService(IGameRepository repository) {
         this.repository = repository;
         this.games = repository.load();
         this.duplicateValidator = new DuplicateValidator();
+        this.undoManager = new UndoManager();
     }
 
     /**
@@ -33,6 +35,8 @@ public class GameService {
         }
         games.add(game);
         repository.save(games);
+        // Record the action in history for undo
+        undoManager.recordAction(new GameAction(GameAction.ActionType.ADD, game));
         return true;
     }
 
@@ -47,6 +51,8 @@ public class GameService {
         if (toRemove != null) {
             games.remove(toRemove);
             repository.save(games);
+            // Record the action in history for undo
+            undoManager.recordAction(new GameAction(GameAction.ActionType.REMOVE, toRemove));
             return true;
         }
         return false;
@@ -81,5 +87,34 @@ public class GameService {
 
         int index = random.nextInt(suitableGames.size());
         return suitableGames.get(index);
+    }
+
+    /**
+     * Undoes the last Add or Remove operation
+     * @return Description of the undone action, or null if no actions to undo
+     */
+    public String undoLastAction() {
+        GameAction lastAction = undoManager.undoLastAction();
+        if (lastAction == null) {
+            return null;
+        }
+
+        BoardGame game = lastAction.getGame();
+        if (lastAction.getType() == GameAction.ActionType.ADD) {
+            // Remove the game that was added
+            games.remove(game);
+        } else {
+            // Add back the game that was removed
+            games.add(game);
+        }
+        repository.save(games);
+        return lastAction.getDescription();
+    }
+
+    /**
+     * Checks if there are actions to undo
+     */
+    public boolean hasActionsToUndo() {
+        return undoManager.hasActionsToUndo();
     }
 }

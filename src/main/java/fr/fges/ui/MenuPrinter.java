@@ -14,8 +14,9 @@ public class MenuPrinter {
                 2. Remove Board Game
                 3. List All Board Games
                 4. Recommend a Game
-                5. View Summary (Weekend Special!)
-                6. Exit
+                5. Undo Last Action
+                6. View Summary (Weekend Special!)
+                7. Exit
                 """;
         } else {
             menuText = """
@@ -24,7 +25,8 @@ public class MenuPrinter {
                 2. Remove Board Game
                 3. List All Board Games
                 4. Recommend a Game
-                5. Exit
+                5. Undo Last Action
+                6. Exit
                 """;
         }
         System.out.println(menuText);
@@ -62,6 +64,8 @@ public class MenuPrinter {
     public void printExitMessage() { System.out.println("Exiting the application. Goodbye!"); }
     public void printInvalidChoice() { System.out.println("Invalid choice. Please select a valid option."); }
     public void printNoGamesInCollection() { System.out.println("No board games in collection."); }
+    public void printUndoSuccess(String actionDescription) { System.out.println("Undone: " + actionDescription); }
+    public void printNothingToUndo() { System.out.println("Nothing to undo."); }
 
     public void printGames(List<BoardGame> games) {
         if (games == null || games.isEmpty()) {

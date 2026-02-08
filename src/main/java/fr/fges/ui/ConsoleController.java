@@ -27,7 +27,7 @@ public class ConsoleController {
 
             menuPrinter.printMainMenu(isWeekend);
 
-            String maxOption = isWeekend ? "6" : "5";
+            String maxOption = isWeekend ? "7" : "6";
             String choice = inputHandler.askString("Please select an option (1-" + maxOption + ")");
 
             switch (choice) {
@@ -35,9 +35,10 @@ public class ConsoleController {
                 case "2" -> handleRemoveGame();
                 case "3" -> handleListGames();
                 case "4" -> handleRecommendGame();
+                case "5" -> handleUndoLastAction();
 
-                // Le cas 5 change selon le jour
-                case "5" -> {
+                // Options change selon le jour
+                case "6" -> {
                     if (isWeekend) {
                         handleWeekendSummary();
                     } else {
@@ -46,8 +47,7 @@ public class ConsoleController {
                     }
                 }
 
-                // Le cas 6 n'existe que le week-end
-                case "6" -> {
+                case "7" -> {
                     if (isWeekend) {
                         menuPrinter.printExitMessage();
                         return;
@@ -106,5 +106,14 @@ public class ConsoleController {
 
     private void handleListGames() {
         menuPrinter.printGames(gameService.getSortedGames());
+    }
+
+    private void handleUndoLastAction() {
+        if (!gameService.hasActionsToUndo()) {
+            menuPrinter.printNothingToUndo();
+            return;
+        }
+        String undoneAction = gameService.undoLastAction();
+        menuPrinter.printUndoSuccess(undoneAction);
     }
 }
