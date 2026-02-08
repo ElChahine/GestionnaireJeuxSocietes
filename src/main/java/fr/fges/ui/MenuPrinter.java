@@ -14,8 +14,9 @@ public class MenuPrinter {
                 2. Remove Board Game
                 3. List All Board Games
                 4. Recommend a Game
-                5. View Summary (Weekend Special!)
-                6. Exit
+                5. Find Games for X Players
+                6. View Summary (Weekend Special!)
+                7. Exit
                 """;
         } else {
             menuText = """
@@ -24,7 +25,8 @@ public class MenuPrinter {
                 2. Remove Board Game
                 3. List All Board Games
                 4. Recommend a Game
-                5. Exit
+                5. Find Games for X Players
+                6. Exit
                 """;
         }
         System.out.println(menuText);
@@ -54,6 +56,23 @@ public class MenuPrinter {
 
     public void printNoRecommendationFound() {
         System.out.println(" No suitable game found for this number of players.");
+    }
+
+    public void printGamesForPlayerCount(int count, List<BoardGame> games) {
+        System.out.println("Games for " + count + " players:");
+        if (games.isEmpty()) {
+            System.out.println("No games found for this player count.");
+            return;
+        }
+
+        for (BoardGame game : games) {
+            // Formatage identique à celui demandé dans la capture
+            System.out.printf("- %s (%d-%d players, %s)%n",
+                    game.title(),
+                    game.minPlayers(),
+                    game.maxPlayers(),
+                    game.category());
+        }
     }
 
     public void printAddSuccess() { System.out.println("Board game added successfully."); }

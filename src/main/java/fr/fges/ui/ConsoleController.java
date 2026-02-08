@@ -18,16 +18,16 @@ public class ConsoleController {
 
     public void start() {
         while (true) {
-            // Vérification du jour pour le menu dynamique
             LocalDate today = LocalDate.now();
             DayOfWeek day = today.getDayOfWeek();
             boolean isWeekend = (day == DayOfWeek.SATURDAY || day == DayOfWeek.SUNDAY);
 
-            // isWeekend = true; // Décommenter pour tester
+            // isWeekend = true; // Pour test
 
             menuPrinter.printMainMenu(isWeekend);
 
-            String maxOption = isWeekend ? "6" : "5";
+            // Adaptation dynamique du nombre d'options (6 en semaine, 7 le week-end)
+            String maxOption = isWeekend ? "7" : "6";
             String choice = inputHandler.askString("Please select an option (1-" + maxOption + ")");
 
             switch (choice) {
@@ -35,9 +35,10 @@ public class ConsoleController {
                 case "2" -> handleRemoveGame();
                 case "3" -> handleListGames();
                 case "4" -> handleRecommendGame();
+                case "5" -> handleFindGamesForPlayers(); // Nouvelle option
 
-                // Le cas 5 change selon le jour
-                case "5" -> {
+                // Gestion du décalage pour le Week-end / Exit
+                case "6" -> {
                     if (isWeekend) {
                         handleWeekendSummary();
                     } else {
@@ -45,9 +46,7 @@ public class ConsoleController {
                         return;
                     }
                 }
-
-                // Le cas 6 n'existe que le week-end
-                case "6" -> {
+                case "7" -> {
                     if (isWeekend) {
                         menuPrinter.printExitMessage();
                         return;
@@ -74,6 +73,12 @@ public class ConsoleController {
         } else {
             menuPrinter.printNoRecommendationFound();
         }
+    }
+
+    private void handleFindGamesForPlayers() {
+        int count = inputHandler.askInt("Number of players");
+        List<BoardGame> matchingGames = gameService.findGamesForPlayers(count);
+        menuPrinter.printGamesForPlayerCount(count, matchingGames);
     }
 
     private void handleAddGame() {

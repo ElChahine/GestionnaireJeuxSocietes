@@ -82,4 +82,13 @@ public class GameService {
         int index = random.nextInt(suitableGames.size());
         return suitableGames.get(index);
     }
+
+
+     //Trouve tous les jeux compatibles avec un nombre spécifique de joueurs.
+    public List<BoardGame> findGamesForPlayers(int playerCount) {
+        return games.stream()
+                .filter(game -> playerCount >= game.minPlayers() && playerCount <= game.maxPlayers())
+                .sorted(Comparator.comparing(BoardGame::title))
+                .toList();
+    }
 }
