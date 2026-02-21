@@ -31,7 +31,7 @@ public class Main {
         GameService service = new GameService(repository);
         InputHandler input = new InputHandler();
         MenuPrinter printer = new MenuPrinter();
-        ConsoleController controller = new ConsoleController(service, input, printer);
+        ConsoleController controller = new ConsoleController(service, service, input, printer);
 
         System.out.println("Starting application with file: " + storageFile);
 

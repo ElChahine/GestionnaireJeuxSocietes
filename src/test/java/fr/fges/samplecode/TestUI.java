@@ -12,7 +12,7 @@ public class TestUI {
         MenuPrinter printer = new MenuPrinter();
         InputHandler input = new InputHandler();
 
-        printer.printMainMenu(false);
+        printer.printMainMenu();
         String name = input.askString("Your name");
         int favNumber = input.askInt("Your favorite number");
 

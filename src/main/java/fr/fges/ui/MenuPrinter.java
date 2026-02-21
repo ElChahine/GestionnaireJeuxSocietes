@@ -5,7 +5,7 @@ import java.util.List;
 
 public class MenuPrinter {
 
-    public void printMainMenu(boolean isWeekend) {
+    public void printMainMenu() {
         System.out.println("=== Board Game Collection ===");
         System.out.println("1. Add Board Game");
         System.out.println("2. Remove Board Game");
@@ -13,13 +13,8 @@ public class MenuPrinter {
         System.out.println("4. Recommend a Game");
         System.out.println("5. Undo Last Action");
         System.out.println("6. Games for X Players"); // <--- L'option manquante
-
-        if (isWeekend) {
-            System.out.println("7. View Summary (Weekend Special!)");
-            System.out.println("8. Exit");
-        } else {
-            System.out.println("7. Exit");
-        }
+        System.out.println("7. View Summary (Weekend Special!)");
+        System.out.println("8. Exit");
     }
 
     public void printGamesForPlayers(int count, List<BoardGame> games) {
@@ -57,6 +52,18 @@ public class MenuPrinter {
 
     public void printNoRecommendationFound() {
         System.out.println(" No suitable game found for this number of players.");
+    }
+
+    public void printWeekendUnavailable() {
+        System.out.println("Weekend summary is only available on Saturdays and Sundays.");
+    }
+
+    public void printAddHeader() {
+        System.out.println("=== Add Board Game ===");
+    }
+
+    public void printRemoveHeader() {
+        System.out.println("=== Remove Board Game ===");
     }
 
     public void printUndoSuccess(String actionDescription) { System.out.println("Undone: " + actionDescription); }

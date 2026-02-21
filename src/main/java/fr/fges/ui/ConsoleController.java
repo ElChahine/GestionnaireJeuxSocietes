@@ -1,104 +1,61 @@
 package fr.fges.ui;
 
-import fr.fges.BoardGame;
-import fr.fges.logic.GameService;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
+import fr.fges.logic.GameCommandService;
+import fr.fges.logic.GameQueryService;
+import fr.fges.ui.commands.AddGameCommand;
+import fr.fges.ui.commands.Command;
+import fr.fges.ui.commands.ExitCommand;
+import fr.fges.ui.commands.GamesForPlayersCommand;
+import fr.fges.ui.commands.ListGamesCommand;
+import fr.fges.ui.commands.RecommendGameCommand;
+import fr.fges.ui.commands.RemoveGameCommand;
+import fr.fges.ui.commands.UndoCommand;
+import fr.fges.ui.commands.WeekendSummaryCommand;
+import java.util.List;
 
 public class ConsoleController {
-    private final GameService gameService;
+    private final GameCommandService gameCommandService;
+    private final GameQueryService gameQueryService;
     private final InputHandler inputHandler;
     private final MenuPrinter menuPrinter;
+    private final List<Command> commands;
 
-    public ConsoleController(GameService service, InputHandler input, MenuPrinter printer) {
-        this.gameService = service;
+    public ConsoleController(GameCommandService commandService, GameQueryService queryService,
+                             InputHandler input, MenuPrinter printer) {
+        this.gameCommandService = commandService;
+        this.gameQueryService = queryService;
         this.inputHandler = input;
         this.menuPrinter = printer;
+        this.commands = List.of(
+                new AddGameCommand(gameCommandService, inputHandler, menuPrinter),
+                new RemoveGameCommand(gameCommandService, inputHandler, menuPrinter),
+                new ListGamesCommand(gameQueryService, menuPrinter),
+                new RecommendGameCommand(gameQueryService, inputHandler, menuPrinter),
+                new UndoCommand(gameCommandService, menuPrinter),
+                new GamesForPlayersCommand(gameQueryService, inputHandler, menuPrinter),
+                new WeekendSummaryCommand(gameQueryService, menuPrinter, 3),
+                new ExitCommand(menuPrinter)
+        );
     }
 
     public void start() {
-        while (true) {
-            LocalDate today = LocalDate.now();
-            DayOfWeek day = today.getDayOfWeek();
-            boolean isWeekend = (day == DayOfWeek.SATURDAY || day == DayOfWeek.SUNDAY);
-            // isWeekend = true; // Décommenter pour tester le week-end
-
-            menuPrinter.printMainMenu(isWeekend);
-
-            
-            String maxOption = isWeekend ? "8" : "7";
-            String choice = inputHandler.askString("Please select an option (1-" + maxOption + ")");
-
-            switch (choice) {
-                case "1" -> handleAddGame();
-                case "2" -> handleRemoveGame();
-                case "3" -> handleListGames();
-                case "4" -> handleRecommendGame();
-                case "5" -> handleUndoLastAction();
-                case "6" -> handleFilterByPlayers(); // <--- AJOUT DU CAS 6
-
-                case "7" -> {
-                    if (isWeekend) handleWeekendSummary();
-                    else { menuPrinter.printExitMessage(); return; }
-                }
-                case "8" -> {
-                    if (isWeekend) { menuPrinter.printExitMessage(); return; }
-                    else menuPrinter.printInvalidChoice();
-                }
-                default -> menuPrinter.printInvalidChoice();
+        boolean running = true;
+        while (running) {
+            menuPrinter.printMainMenu();
+            int selection = inputHandler.askInt("Please select an option (1-" + commands.size() + ")");
+            Command command = getCommandByIndex(selection);
+            if (command == null) {
+                menuPrinter.printInvalidChoice();
+                continue;
             }
+            running = command.execute();
         }
     }
 
-    // --- NOUVELLE MÉTHODE ---
-    private void handleFilterByPlayers() {
-        int count = inputHandler.askInt("Enter number of players");
-        var games = gameService.getGamesForPlayerCount(count);
-        menuPrinter.printGamesForPlayers(count, games);
-    }
-    // -----------------------
-
-    private void handleWeekendSummary() {
-        var selection = gameService.getWeekendSelection();
-        menuPrinter.printWeekendSelection(selection);
-    }
-
-    private void handleRecommendGame() {
-        int playerCount = inputHandler.askInt("How many players?");
-        BoardGame recommended = gameService.recommendGame(playerCount);
-        if (recommended != null) menuPrinter.printRecommendation(recommended);
-        else menuPrinter.printNoRecommendationFound();
-    }
-
-    private void handleUndoLastAction() {
-        if (!gameService.hasActionsToUndo()) {
-            menuPrinter.printNothingToUndo();
-            return;
+    private Command getCommandByIndex(int index) {
+        if (index < 1 || index > commands.size()) {
+            return null;
         }
-        String undoneAction = gameService.undoLastAction();
-        menuPrinter.printUndoSuccess(undoneAction);
-    }
-
-    private void handleAddGame() {
-        String title = inputHandler.askString("Title");
-        int minPlayers = inputHandler.askInt("Min Players");
-        int maxPlayers = inputHandler.askInt("Max Players");
-        String category = inputHandler.askString("Category");
-
-        BoardGame newGame = new BoardGame(title, minPlayers, maxPlayers, category);
-        boolean added = gameService.addGame(newGame);
-
-        if (added) menuPrinter.printAddSuccess();
-        else menuPrinter.printDuplicateError(title);
-    }
-
-    private void handleRemoveGame() {
-        String title = inputHandler.askString("Title to remove");
-        if (gameService.removeGame(title)) menuPrinter.printRemoveSuccess();
-        else menuPrinter.printNoGameFound();
-    }
-
-    private void handleListGames() {
-        menuPrinter.printGames(gameService.getSortedGames());
+        return commands.get(index - 1);
     }
 }

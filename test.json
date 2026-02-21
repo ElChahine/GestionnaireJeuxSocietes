@@ -8,4 +8,9 @@
   "minPlayers" : 1,
   "maxPlayers" : 1,
   "category" : "1"
+}, {
+  "title" : "Catan",
+  "minPlayers" : 1,
+  "maxPlayers" : 2,
+  "category" : "test"
 } ]
