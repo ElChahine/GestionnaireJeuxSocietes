@@ -158,4 +158,16 @@ public class GameService implements GameCommandService, GameQueryService {
         DayOfWeek day = date.getDayOfWeek();
         return day == DayOfWeek.SATURDAY || day == DayOfWeek.SUNDAY;
     }
+    public List<BoardGame> getTwoPlayerGames() {
+        List<BoardGame> twoPlayerGames = new ArrayList<>();
+        List<BoardGame> allGames = loadGames(); // On récupère tous les jeux
+
+        for (BoardGame game : allGames) {
+            // Si le jeu permet de jouer à 2 (min <= 2 et max >= 2)
+            if (game.minPlayers() <= 2 && game.maxPlayers() >= 2) {
+                twoPlayerGames.add(game);
+            }
+        }
+        return twoPlayerGames;
+    }
 }

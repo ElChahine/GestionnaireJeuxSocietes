@@ -19,6 +19,7 @@ public class ConsoleController {
     private final InputHandler inputHandler;
     private final MenuPrinter menuPrinter;
     private final List<Command> commands;
+    
 
     public ConsoleController(GameCommandService commandService, GameQueryService queryService,
                              InputHandler input, MenuPrinter printer) {
