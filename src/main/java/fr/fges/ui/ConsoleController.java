@@ -11,6 +11,8 @@ import fr.fges.ui.commands.RecommendGameCommand;
 import fr.fges.ui.commands.RemoveGameCommand;
 import fr.fges.ui.commands.UndoCommand;
 import fr.fges.ui.commands.WeekendSummaryCommand;
+import fr.fges.ui.commands.TournamentCommand; // L'import de ton tournoi
+
 import java.util.List;
 
 public class ConsoleController {
@@ -19,7 +21,6 @@ public class ConsoleController {
     private final InputHandler inputHandler;
     private final MenuPrinter menuPrinter;
     private final List<Command> commands;
-    
 
     public ConsoleController(GameCommandService commandService, GameQueryService queryService,
                              InputHandler input, MenuPrinter printer) {
@@ -27,6 +28,8 @@ public class ConsoleController {
         this.gameQueryService = queryService;
         this.inputHandler = input;
         this.menuPrinter = printer;
+
+        // Liste dynamique des commandes
         this.commands = List.of(
                 new AddGameCommand(gameCommandService, inputHandler, menuPrinter),
                 new RemoveGameCommand(gameCommandService, inputHandler, menuPrinter),
@@ -35,7 +38,8 @@ public class ConsoleController {
                 new UndoCommand(gameCommandService, menuPrinter),
                 new GamesForPlayersCommand(gameQueryService, inputHandler, menuPrinter),
                 new WeekendSummaryCommand(gameQueryService, menuPrinter, 3),
-                new ExitCommand(menuPrinter)
+                new TournamentCommand(gameQueryService, inputHandler), // Option 8
+                new ExitCommand(menuPrinter)                           // Option 9
         );
     }
 
@@ -43,12 +47,16 @@ public class ConsoleController {
         boolean running = true;
         while (running) {
             menuPrinter.printMainMenu();
+
             int selection = inputHandler.askInt("Please select an option (1-" + commands.size() + ")");
             Command command = getCommandByIndex(selection);
+
             if (command == null) {
                 menuPrinter.printInvalidChoice();
                 continue;
             }
+
+            // Exécute la commande. Si c'est ExitCommand, ça renverra false et arrêtera la boucle.
             running = command.execute();
         }
     }

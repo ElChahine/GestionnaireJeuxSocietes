@@ -13,4 +13,5 @@ public interface GameQueryService {
     BoardGame recommendGame(int playerCount);
 
     Optional<List<BoardGame>> getWeekendSelection(LocalDate date, int selectionSize);
+    List<BoardGame> getTwoPlayerGames();
 }

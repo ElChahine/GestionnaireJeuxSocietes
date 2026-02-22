@@ -6,15 +6,16 @@ import java.util.List;
 public class MenuPrinter {
 
     public void printMainMenu() {
-        System.out.println("=== Board Game Collection ===");
+        System.out.println("\n=== Board Game Collection ===");
         System.out.println("1. Add Board Game");
         System.out.println("2. Remove Board Game");
         System.out.println("3. List All Board Games");
         System.out.println("4. Recommend a Game");
         System.out.println("5. Undo Last Action");
-        System.out.println("6. Games for X Players"); // <--- L'option manquante
+        System.out.println("6. Games for X Players");
         System.out.println("7. View Summary (Weekend Special!)");
-        System.out.println("8. Exit");
+        System.out.println("8. Tournament Mode");
+        System.out.println("9. Exit");
     }
 
     public void printGamesForPlayers(int count, List<BoardGame> games) {
