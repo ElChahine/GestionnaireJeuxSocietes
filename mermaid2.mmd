@@ -1,0 +1,121 @@
+classDiagram
+    %% --- COUCHE UI (Interface Utilisateur) ---
+    namespace UI {
+        class ConsoleController {
+            -GameService gameService
+            -TournamentService tournamentService
+            -InputHandler inputHandler
+            -MenuPrinter menuPrinter
+            +start()
+            -handleTournamentMode()
+        }
+        
+        class InputHandler {
+            +askString(prompt)
+            +askInt(prompt)
+        }
+        
+        class MenuPrinter {
+            +printMainMenu()
+            +printTournamentResults()
+        }
+    }
+
+    %% --- COUCHE LOGIC (Cœur du métier) ---
+    namespace Logic {
+        class GameService {
+            -IGameRepository repository
+            +getGamesForPlayerCount(2)
+        }
+
+        class TournamentService {
+            -GameService gameService
+            -ITournamentStrategy currentStrategy
+            -List~TournamentPlayer~ players
+            +startTournament(game, players, strategyType)
+            +playNextMatch()
+            +getRankings()
+        }
+
+        class TournamentPlayer {
+            -String name
+            -int points
+            -int wins
+            +addVictory()
+            +addDefeat()
+        }
+
+        %% LE PATTERN STRATEGY %%
+        class ITournamentStrategy {
+            <<interface>>
+            +generateSchedule(players)
+            +getNextMatch() Match
+            +handleMatchResult(winner, loser)
+            +isFinished() boolean
+        }
+
+        class RoundRobinStrategy {
+            -Queue~Match~ scheduledMatches
+            +generateSchedule()
+        }
+
+        class KingOfTheHillStrategy {
+            -TournamentPlayer currentKing
+            -Queue~TournamentPlayer~ challengers
+            +generateSchedule()
+        }
+        
+        class Match {
+            -TournamentPlayer p1
+            -TournamentPlayer p2
+        }
+    }
+
+    %% --- COUCHE DATA (Accès aux données) ---
+    namespace Data {
+        class IGameRepository {
+            <<interface>>
+            +load()
+            +save()
+        }
+        
+        class CsvFileRepository {
+            +load()
+            +save()
+        }
+        
+        class JsonFileRepository {
+            +load()
+            +save()
+        }
+        
+        class BoardGame {
+            <<Record>>
+            String title
+            int minPlayers
+            int maxPlayers
+            String category
+        }
+    }
+
+    %% RELATIONS
+    %% UI vers Logic
+    ConsoleController --> GameService
+    ConsoleController --> TournamentService
+    ConsoleController --> InputHandler
+    ConsoleController --> MenuPrinter
+
+    %% Logic interne
+    TournamentService --> GameService : "Valide jeu 2 joueurs"
+    TournamentService --> ITournamentStrategy : "Utilise"
+    TournamentService *-- TournamentPlayer : "Gère"
+    
+    ITournamentStrategy <|.. RoundRobinStrategy : "Implémente"
+    ITournamentStrategy <|.. KingOfTheHillStrategy : "Implémente"
+    ITournamentStrategy ..> Match : "Crée"
+
+    %% Logic vers Data
+    GameService --> IGameRepository
+    IGameRepository <|.. CsvFileRepository
+    IGameRepository <|.. JsonFileRepository
+    IGameRepository ..> BoardGame
