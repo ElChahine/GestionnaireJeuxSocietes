@@ -24,7 +24,7 @@ public class ConsoleController {
                 new UndoCommand(manager, menuPrinter),
                 new GamesForPlayersCommand(searcher, inputHandler, menuPrinter),
                 new WeekendSummaryCommand(suggester, menuPrinter, 3),
-                new TournamentCommand(searcher, tournament, inputHandler),
+                new TournamentCommand(searcher, tournament, inputHandler, menuPrinter),
                 new ExitCommand(menuPrinter)
         );
     }
