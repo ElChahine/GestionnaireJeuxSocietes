@@ -10,9 +10,7 @@ public class ExitCommand implements Command {
     }
 
     @Override
-    public String getLabel() {
-        return "Exit";
-    }
+    public String getLabel() { return "Exit"; }
 
     @Override
     public boolean execute() {

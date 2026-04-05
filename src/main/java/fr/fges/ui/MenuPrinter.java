@@ -1,21 +1,17 @@
 package fr.fges.ui;
 
 import fr.fges.BoardGame;
+import fr.fges.ui.commands.Command;
 import java.util.List;
 
 public class MenuPrinter {
 
-    public void printMainMenu() {
+    // Nouvelle méthode pour imprimer le menu dynamiquement
+    public void printDynamicMenu(List<Command> visibleCommands) {
         System.out.println("\n=== Board Game Collection ===");
-        System.out.println("1. Add Board Game");
-        System.out.println("2. Remove Board Game");
-        System.out.println("3. List All Board Games");
-        System.out.println("4. Recommend a Game");
-        System.out.println("5. Undo Last Action");
-        System.out.println("6. Games for X Players");
-        System.out.println("7. View Summary (Weekend Special!)");
-        System.out.println("8. Tournament Mode");
-        System.out.println("9. Exit");
+        for (int i = 0; i < visibleCommands.size(); i++) {
+            System.out.println((i + 1) + ". " + visibleCommands.get(i).getLabel());
+        }
     }
 
     public void printGamesForPlayers(int count, List<BoardGame> games) {

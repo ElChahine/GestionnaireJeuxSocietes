@@ -1,70 +1,52 @@
 package fr.fges.ui;
 
-import fr.fges.logic.GameCommandService;
-import fr.fges.logic.GameQueryService;
-import fr.fges.ui.commands.AddGameCommand;
-import fr.fges.ui.commands.Command;
-import fr.fges.ui.commands.ExitCommand;
-import fr.fges.ui.commands.GamesForPlayersCommand;
-import fr.fges.ui.commands.ListGamesCommand;
-import fr.fges.ui.commands.RecommendGameCommand;
-import fr.fges.ui.commands.RemoveGameCommand;
-import fr.fges.ui.commands.UndoCommand;
-import fr.fges.ui.commands.WeekendSummaryCommand;
-import fr.fges.ui.commands.TournamentCommand; // L'import de ton tournoi
-
+import fr.fges.logic.*;
+import fr.fges.ui.commands.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ConsoleController {
-    private final GameCommandService gameCommandService;
-    private final GameQueryService gameQueryService;
+    private final List<Command> allCommands;
     private final InputHandler inputHandler;
     private final MenuPrinter menuPrinter;
-    private final List<Command> commands;
 
-    public ConsoleController(GameCommandService commandService, GameQueryService queryService,
-                             InputHandler input, MenuPrinter printer) {
-        this.gameCommandService = commandService;
-        this.gameQueryService = queryService;
+    public ConsoleController(GameManager manager, GameSearcher searcher, GameSuggester suggester,
+                             TournamentService tournament, InputHandler input, MenuPrinter printer) {
         this.inputHandler = input;
         this.menuPrinter = printer;
 
-        // Liste dynamique des commandes
-        this.commands = List.of(
-                new AddGameCommand(gameCommandService, inputHandler, menuPrinter),
-                new RemoveGameCommand(gameCommandService, inputHandler, menuPrinter),
-                new ListGamesCommand(gameQueryService, menuPrinter),
-                new RecommendGameCommand(gameQueryService, inputHandler, menuPrinter),
-                new UndoCommand(gameCommandService, menuPrinter),
-                new GamesForPlayersCommand(gameQueryService, inputHandler, menuPrinter),
-                new WeekendSummaryCommand(gameQueryService, menuPrinter, 3),
-                new TournamentCommand(gameQueryService, inputHandler), // Option 8
-                new ExitCommand(menuPrinter)                           // Option 9
+        // Initialisation de la liste de toutes les commandes avec les services spécialisés
+        this.allCommands = List.of(
+                new AddGameCommand(manager, inputHandler, menuPrinter),
+                new RemoveGameCommand(manager, inputHandler, menuPrinter),
+                new ListGamesCommand(searcher, menuPrinter),
+                new RecommendGameCommand(suggester, inputHandler, menuPrinter),
+                new UndoCommand(manager, menuPrinter),
+                new GamesForPlayersCommand(searcher, inputHandler, menuPrinter),
+                new WeekendSummaryCommand(suggester, menuPrinter, 3),
+                new TournamentCommand(searcher, tournament, inputHandler),
+                new ExitCommand(menuPrinter)
         );
     }
 
     public void start() {
         boolean running = true;
         while (running) {
-            menuPrinter.printMainMenu();
+            // Filtrage dynamique des commandes visibles
+            List<Command> visibleCommands = allCommands.stream()
+                    .filter(Command::isVisible)
+                    .collect(Collectors.toList());
 
-            int selection = inputHandler.askInt("Please select an option (1-" + commands.size() + ")");
-            Command command = getCommandByIndex(selection);
+            menuPrinter.printDynamicMenu(visibleCommands);
 
-            if (command == null) {
+            int selection = inputHandler.askInt("Please select an option (1-" + visibleCommands.size() + ")");
+
+            if (selection < 1 || selection > visibleCommands.size()) {
                 menuPrinter.printInvalidChoice();
                 continue;
             }
 
-            // Exécute la commande. Si c'est ExitCommand, ça renverra false et arrêtera la boucle.
-            running = command.execute();
+            running = visibleCommands.get(selection - 1).execute();
         }
-    }
-
-    private Command getCommandByIndex(int index) {
-        if (index < 1 || index > commands.size()) {
-            return null;
-        }
-        return commands.get(index - 1);
     }
 }

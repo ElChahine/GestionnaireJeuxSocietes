@@ -1,33 +1,37 @@
 package fr.fges.ui.commands;
 
-import fr.fges.logic.GameQueryService;
+import fr.fges.logic.GameSuggester;
 import fr.fges.ui.MenuPrinter;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 
 public class WeekendSummaryCommand implements Command {
-    private final GameQueryService gameService;
+    private final GameSuggester gameSuggester;
     private final MenuPrinter menuPrinter;
     private final int selectionSize;
 
-    public WeekendSummaryCommand(GameQueryService gameService, MenuPrinter menuPrinter, int selectionSize) {
-        this.gameService = gameService;
+    public WeekendSummaryCommand(GameSuggester gameSuggester, MenuPrinter menuPrinter, int selectionSize) {
+        this.gameSuggester = gameSuggester;
         this.menuPrinter = menuPrinter;
         this.selectionSize = selectionSize;
     }
 
     @Override
-    public String getLabel() {
-        return "View Summary (Weekend Special!)";
+    public String getLabel() { return "View Summary (Weekend Special!)"; }
+
+    @Override
+    public boolean isVisible() {
+        DayOfWeek day = LocalDate.now().getDayOfWeek();
+        return day == DayOfWeek.SATURDAY || day == DayOfWeek.SUNDAY;
     }
 
     @Override
     public boolean execute() {
-        var selection = gameService.getWeekendSelection(LocalDate.now(), selectionSize);
-        if (selection.isEmpty()) {
-            menuPrinter.printWeekendUnavailable();
-            return true;
-        }
-        menuPrinter.printWeekendSelection(selection.get());
+        var selection = gameSuggester.getWeekendSelection(LocalDate.now(), selectionSize);
+        selection.ifPresentOrElse(
+                menuPrinter::printWeekendSelection,
+                menuPrinter::printWeekendUnavailable
+        );
         return true;
     }
 }

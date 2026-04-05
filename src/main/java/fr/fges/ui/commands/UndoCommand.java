@@ -1,29 +1,27 @@
 package fr.fges.ui.commands;
 
-import fr.fges.logic.GameCommandService;
+import fr.fges.logic.GameManager;
 import fr.fges.ui.MenuPrinter;
 
 public class UndoCommand implements Command {
-    private final GameCommandService gameService;
+    private final GameManager gameManager;
     private final MenuPrinter menuPrinter;
 
-    public UndoCommand(GameCommandService gameService, MenuPrinter menuPrinter) {
-        this.gameService = gameService;
+    public UndoCommand(GameManager gameManager, MenuPrinter menuPrinter) {
+        this.gameManager = gameManager;
         this.menuPrinter = menuPrinter;
     }
 
     @Override
-    public String getLabel() {
-        return "Undo Last Action";
-    }
+    public String getLabel() { return "Undo Last Action"; }
 
     @Override
     public boolean execute() {
-        if (!gameService.hasActionsToUndo()) {
+        if (!gameManager.hasActionsToUndo()) {
             menuPrinter.printNothingToUndo();
             return true;
         }
-        String undoneAction = gameService.undoLastAction();
+        String undoneAction = gameManager.undoLastAction();
         menuPrinter.printUndoSuccess(undoneAction);
         return true;
     }

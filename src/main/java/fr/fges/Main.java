@@ -1,9 +1,11 @@
 package fr.fges;
 
-import fr.fges.data.CsvFileRepository;
 import fr.fges.data.IGameRepository;
-import fr.fges.data.JsonFileRepository;
-import fr.fges.logic.GameService;
+import fr.fges.data.RepositoryFactory;
+import fr.fges.logic.GameManager;
+import fr.fges.logic.GameSearcher;
+import fr.fges.logic.GameSuggester;
+import fr.fges.logic.TournamentService;
 import fr.fges.ui.ConsoleController;
 import fr.fges.ui.InputHandler;
 import fr.fges.ui.MenuPrinter;
@@ -14,28 +16,23 @@ public class Main {
             System.out.println("Usage: java -jar app.jar <storage-file>");
             System.exit(1);
         }
-        String storageFile = args[0];
 
-        // Choix de la stratégie de stockage selon l'extension
-        IGameRepository repository;
-        if (storageFile.endsWith(".json")) {
-            repository = new JsonFileRepository(storageFile);
-        } else if (storageFile.endsWith(".csv")) {
-            repository = new CsvFileRepository(storageFile);
-        } else {
-            System.out.println("Error: File must be .json or .csv");
-            return;
-        }
+        // Utilisation de la Factory : plus de "if" sur les extensions ici
+        IGameRepository repository = RepositoryFactory.createRepository(args[0]);
 
-        // Assemblage des composants (Injection de dépendances)
-        GameService service = new GameService(repository);
+        // Instanciation des nouveaux services spécialisés
+        GameManager manager = new GameManager(repository);
+        GameSearcher searcher = new GameSearcher(repository);
+        GameSuggester suggester = new GameSuggester(repository);
+        TournamentService tournamentService = new TournamentService();
+
         InputHandler input = new InputHandler();
         MenuPrinter printer = new MenuPrinter();
-        ConsoleController controller = new ConsoleController(service, service, input, printer);
 
-        System.out.println("Starting application with file: " + storageFile);
+        // Injection des services dans le contrôleur
+        ConsoleController controller = new ConsoleController(manager, searcher, suggester, tournamentService, input, printer);
 
-        // Démarrage de l'interface
+        System.out.println("Starting application with file: " + args[0]);
         controller.start();
     }
 }
