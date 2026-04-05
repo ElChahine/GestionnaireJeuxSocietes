@@ -13,6 +13,7 @@ import fr.fges.ui.commands.UndoCommand;
 import fr.fges.ui.commands.WeekendSummaryCommand;
 import fr.fges.ui.commands.TournamentCommand; // L'import de ton tournoi
 
+import java.time.LocalDate;
 import java.util.List;
 
 public class ConsoleController {
@@ -46,10 +47,11 @@ public class ConsoleController {
     public void start() {
         boolean running = true;
         while (running) {
-            menuPrinter.printMainMenu();
+            List<Command> availableCommands = getAvailableCommands(LocalDate.now());
+            menuPrinter.printMainMenu(availableCommands);
 
-            int selection = inputHandler.askInt("Please select an option (1-" + commands.size() + ")");
-            Command command = getCommandByIndex(selection);
+            int selection = inputHandler.askInt("Please select an option (1-" + availableCommands.size() + ")");
+            Command command = getCommandByIndex(availableCommands, selection);
 
             if (command == null) {
                 menuPrinter.printInvalidChoice();
@@ -61,10 +63,16 @@ public class ConsoleController {
         }
     }
 
-    private Command getCommandByIndex(int index) {
-        if (index < 1 || index > commands.size()) {
+    private List<Command> getAvailableCommands(LocalDate date) {
+        return commands.stream()
+                .filter(command -> command.isAvailable(date))
+                .toList();
+    }
+
+    private Command getCommandByIndex(List<Command> commandList, int index) {
+        if (index < 1 || index > commandList.size()) {
             return null;
         }
-        return commands.get(index - 1);
+        return commandList.get(index - 1);
     }
 }

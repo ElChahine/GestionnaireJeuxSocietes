@@ -2,6 +2,7 @@ package fr.fges.ui.commands;
 
 import fr.fges.logic.GameQueryService;
 import fr.fges.ui.MenuPrinter;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 
 public class WeekendSummaryCommand implements Command {
@@ -18,6 +19,12 @@ public class WeekendSummaryCommand implements Command {
     @Override
     public String getLabel() {
         return "View Summary (Weekend Special!)";
+    }
+
+    @Override
+    public boolean isAvailable(LocalDate date) {
+        DayOfWeek day = date.getDayOfWeek();
+        return day == DayOfWeek.SATURDAY || day == DayOfWeek.SUNDAY;
     }
 
     @Override
