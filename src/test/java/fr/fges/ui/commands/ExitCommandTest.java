@@ -15,4 +15,4 @@ class ExitCommandTest {
         ExitCommand command = new ExitCommand(new fr.fges.ui.MenuPrinter());
         assertFalse(command.execute(), "ExitCommand doit retourner false pour arrêter la boucle");
     }
-}
+} 
