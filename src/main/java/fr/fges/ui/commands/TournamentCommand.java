@@ -107,7 +107,7 @@ public class TournamentCommand implements Command {
         }
     }
 
-    // VOICI LA METHODE QUI MANQUAIT !
+    
     @Override
     public String getLabel() {
         return "Tournament Mode";
